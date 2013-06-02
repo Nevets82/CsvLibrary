@@ -7,6 +7,11 @@
     {
         #region Field members.
         /// <summary>
+        /// Contains the encoding.
+        /// </summary>
+        private System.Text.Encoding _encoding;
+
+        /// <summary>
         /// Contains the has header state.
         /// </summary>
         private bool _hasHeader;
@@ -23,6 +28,14 @@
         #endregion
 
         #region Property members.
+        /// <summary>
+        /// Gets the encoding.
+        /// </summary>
+        public System.Text.Encoding Encoding
+        {
+            get { return this._encoding; }
+        }
+
         /// <summary>
         /// Gets or sets the has header state.
         /// </summary>
@@ -55,9 +68,19 @@
         /// <summary>
         /// Creates a new instance of this class.
         /// </summary>
-        public CsvOptions()
+        public CsvOptions() :
+            this(System.Text.Encoding.ASCII)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance of this class.
+        /// </summary>
+        /// <param name="encoding">The encoding.</param>
+        public CsvOptions(System.Text.Encoding encoding)
         {
             // Initialize field members.
+            this._encoding = encoding;
             this._hasHeader = false;
             this._seperator = ',';
             this._stringCharacter = '"';

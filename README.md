@@ -14,5 +14,4 @@ Resources
 
 Todo
 ----
-+ Add CsvWriter class.
-+ Add better System.IO.Stream support to CsvReader class.
++ Test code extensively.

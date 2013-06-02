@@ -157,7 +157,7 @@
 
                 if (this.IsValidValue(value))
                 {
-                    resultList.Add(this.Escape(value));
+                    resultList.Add(this.Unescape(value));
 
                     value = null;
                 }
@@ -219,11 +219,11 @@
         }
 
         /// <summary>
-        /// Escapes the specified value.
+        /// Unescapes the specified value.
         /// </summary>
         /// <param name="value">The value.</param>
-        /// <returns>The escaped value.</returns>
-        private string Escape(string value)
+        /// <returns>The unescaped value.</returns>
+        private string Unescape(string value)
         {
             var stringCharacter = this.Options.StringCharacter.ToString();
 
@@ -244,6 +244,7 @@
         /// <summary>
         /// Creates a new instance of this class.
         /// </summary>
+        /// <param name="path">The complete file path to be read.</param>
         public CsvReader(string path) :
             this(path, new CsvOptions())
         {
@@ -252,9 +253,35 @@
         /// <summary>
         /// Creates a new instance of this class.
         /// </summary>
+        /// <param name="path">The complete file path to be read.</param>
         /// <param name="options">The CSV options.</param>
         public CsvReader(string path, CsvOptions options) :
-            base(path)
+            base(path, options.Encoding)
+        {
+            // Validate constructor parameters.
+            if (options == null) { throw new System.ArgumentNullException("options"); }
+
+            // Initialize field members.
+            this._header = null;
+            this._options = options;
+        }
+
+        /// <summary>
+        /// Creates a new instance of this class.
+        /// </summary>
+        /// <param name="stream">The stream to be read.</param>
+        public CsvReader(System.IO.Stream stream) :
+            this(stream, new CsvOptions())
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance of this class.
+        /// </summary>
+        /// <param name="stream">The stream to be read.</param>
+        /// <param name="options">The CSV options.</param>
+        public CsvReader(System.IO.Stream stream, CsvOptions options) :
+            base(stream, options.Encoding)
         {
             // Validate constructor parameters.
             if (options == null) { throw new System.ArgumentNullException("options"); }
