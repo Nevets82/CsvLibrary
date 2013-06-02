@@ -44,23 +44,7 @@
         }
         #endregion
 
-        #region CSV reader members.
-        /// <summary>
-        /// Reads the CSV header.
-        /// </summary>
-        /// <returns>The CSV header.</returns>
-        private string[] ReadHeader()
-        {
-            string[] header = null;
-
-            if (this.Options.HasHeader)
-            {
-                header = this.ReadRecordFromStream();
-            }
-
-            return header;
-        }
-
+        #region Public reader members.
         /// <summary>
         /// Reads a CSV record.
         /// </summary>
@@ -104,6 +88,24 @@
 
             return result.ToArray();
         }
+        #endregion
+
+        #region Private reader members.
+        /// <summary>
+        /// Reads the CSV header.
+        /// </summary>
+        /// <returns>The CSV header.</returns>
+        private string[] ReadHeader()
+        {
+            string[] header = null;
+
+            if (this.Options.HasHeader)
+            {
+                header = this.ReadRecordFromStream();
+            }
+
+            return header;
+        }
 
         /// <summary>
         /// Reads a CSV record from the underliing stream.
@@ -117,7 +119,7 @@
 
                 var record = this.ReadLine();
 
-                while (!this.TryParseValues(record, out result))
+                while (!this.TryParseRecord(record, out result))
                 {
                     record += "\r\n" + this.ReadLine();
                 }
@@ -128,10 +130,13 @@
             return null;
         }
 
-
-
-
-        private bool TryParseValues(string record, out string[] result)
+        /// <summary>
+        /// Tries to parse the specified record to a string array.
+        /// </summary>
+        /// <param name="record">The record to parse.</param>
+        /// <param name="result">The result.</param>
+        /// <returns>True if the operation was successful, otherwise false.</returns>
+        private bool TryParseRecord(string record, out string[] result)
         {
             var resultList = new System.Collections.Generic.List<string>();
 
@@ -170,21 +175,59 @@
             return false;
         }
 
+        /// <summary>
+        /// Returns true if the specified value is valid.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>True if the specified value is valid, otherwise false.</returns>
         private bool IsValidValue(string value)
         {
             var stringCharacter = this.Options.StringCharacter.ToString();
 
-            if (value.StartsWith(stringCharacter))
+            if (this.HasValidStringCharacters(value))
             {
-                return value.EndsWith(stringCharacter);
+                if (value.StartsWith(stringCharacter))
+                {
+                    return value.EndsWith(stringCharacter);
+                }
+
+                return true;
             }
 
-            return true;
+            return false;
         }
 
+        /// <summary>
+        /// Returns true if the specified value has a valid number of string characters.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>True if the specified value has a valid number of string characters, otherwise false.</returns>
+        private bool HasValidStringCharacters(string value)
+        {
+            var count = 0;
+
+            var index = value.IndexOf(this.Options.StringCharacter);
+
+            while (index >= 0)
+            {
+                count++;
+
+                index = value.IndexOf(this.Options.StringCharacter, index + 1);
+            }
+
+            return count % 2 == 0;
+        }
+
+        /// <summary>
+        /// Escapes the specified value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>The escaped value.</returns>
         private string Escape(string value)
         {
             var stringCharacter = this.Options.StringCharacter.ToString();
+
+            if (value == stringCharacter) { throw new System.ArgumentException(string.Format("The specified value cannot be '{0}'.", stringCharacter), "value"); }
 
             if (value.StartsWith(stringCharacter) && value.EndsWith(stringCharacter))
             {
